@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>삼성통합발주서 실행</title>
+  <style>
+    body {
+      font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px 50px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      text-align: center;
+      min-width: 360px;
+    }
+    h2 {
+      font-size: 20px;
+      color: #1a237e;
+      margin-bottom: 8px;
+    }
+    p.sub {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      margin-bottom: 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-1st {
+      background: #1565c0;
+      color: white;
+      box-shadow: 0 4px 12px rgba(21,101,192,0.35);
+    }
+    .btn-1st:hover { background: #0d47a1; }
+    .btn-2nd {
+      background: #2e7d32;
+      color: white;
+      box-shadow: 0 4px 12px rgba(46,125,50,0.35);
+    }
+    .btn-2nd:hover { background: #1b5e20; }
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+      min-height: 24px;
+    }
+    .success { color: #2e7d32; font-weight: bold; }
+    .error   { color: #c62828; font-weight: bold; }
+    .loading { color: #1565c0; }
+    .note {
+      margin-top: 28px;
+      background: #fff8e1;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #795548;
+      text-align: left;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>📦 삼성 통합 발주서 실행</h2>
+    <p class="sub">실행할 발송 차수를 선택하세요</p>
+
+    <button class="btn btn-1st" onclick="runWorkflow('1차')">🚀 1차 발송 실행</button>
+    <button class="btn btn-2nd" onclick="runWorkflow('2차')">🚀 2차 발송 실행</button>
+
+    <div id="status"></div>
+
+    <div class="note">
+      ⚙️ <b>설정 안내 (담당자가 처음 한 번만 수정)</b><br>
+      이 파일을 메모장으로 열고,<br>
+      아래 두 URL을 실제 n8n 서버 주소로 바꿔주세요:<br>
+      <code>N8N_1ST_URL</code> → 1차 Webhook URL<br>
+      <code>N8N_2ND_URL</code> → 2차 Webhook URL
+    </div>
+  </div>
+
+  <script>
+    // ✏️ 아래 두 URL을 n8n에서 복사한 실제 Webhook URL로 변경하세요
+    const WEBHOOK_URLS = {
+      '1차': 'https://sperospera.app.n8n.cloud/webhook/samsung-order-1st
+',  // 예: http://localhost:5678/webhook/samsung-order-1st
+      '2차': 'https://sperospera.app.n8n.cloud/webhook/samsung-order-2nd'   // 예: http://localhost:5678/webhook/samsung-order-2nd
+    };
+
+    async function runWorkflow(batch) {
+      const statusEl = document.getElementById('status');
+      statusEl.className = 'loading';
+      statusEl.textContent = `⏳ ${batch} 발송 워크플로우 실행 중...`;
+
+      try {
+        const response = await fetch(WEBHOOK_URLS[batch], { method: 'GET' });
+        if (response.ok) {
+          statusEl.className = 'success';
+          statusEl.textContent = `✅ ${batch} 발송 워크플로우가 성공적으로 실행되었습니다!`;
+        } else {
+          statusEl.className = 'error';
+          statusEl.textContent = `❌ 오류가 발생했습니다. (HTTP ${response.status})`;
+        }
+      } catch (e) {
+        statusEl.className = 'error';
+        statusEl.textContent = `❌ 연결 실패: URL을 확인해주세요.`;
+      }
+    }
+  </script>
+</body>
+</html>
