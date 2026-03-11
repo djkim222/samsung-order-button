@@ -9,92 +9,55 @@
     body {
       font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
       background: #f0f4f8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       min-height: 100vh;
     }
     .card {
-      background: white;
-      border-radius: 16px;
+      background: white; border-radius: 16px;
       padding: 40px 50px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-      text-align: center;
-      width: 400px;
+      text-align: center; width: 400px;
     }
     h2 { font-size: 20px; color: #1a237e; margin-bottom: 8px; }
     p.sub { color: #888; font-size: 14px; margin-bottom: 28px; }
 
     .btn {
       display: block; width: 100%;
-      padding: 18px; margin-bottom: 14px;
+      padding: 20px; margin-bottom: 14px;
       border: none; border-radius: 10px;
-      font-size: 17px; font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.1s, opacity 0.2s;
-      position: relative;
+      font-size: 18px; font-weight: bold;
+      cursor: pointer; transition: transform 0.1s, opacity 0.2s;
     }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn:not(:disabled):active { transform: scale(0.97); }
-    .btn-1st { background: #1565c0; color: white; }
-    .btn-2nd { background: #2e7d32; color: white; }
+    .btn-main { background: #1565c0; color: white;
+                box-shadow: 0 4px 12px rgba(21,101,192,0.35); }
+    .btn-main:not(:disabled):hover { background: #0d47a1; }
 
-    /* 상태 박스 */
     #status-box {
-      margin-top: 20px;
-      border-radius: 10px;
-      padding: 16px 18px;
-      font-size: 14px;
-      line-height: 1.7;
-      text-align: left;
-      display: none;
+      margin-top: 20px; border-radius: 10px;
+      padding: 16px 18px; font-size: 14px;
+      line-height: 1.8; text-align: left; display: none;
     }
-    #status-box.loading {
-      display: block;
-      background: #e3f2fd;
-      border: 1px solid #90caf9;
-      color: #1565c0;
-    }
-    #status-box.success {
-      display: block;
-      background: #e8f5e9;
-      border: 1px solid #a5d6a7;
-      color: #1b5e20;
-    }
-    #status-box.error {
-      display: block;
-      background: #ffebee;
-      border: 1px solid #ef9a9a;
-      color: #b71c1c;
-    }
+    #status-box.loading { display:block; background:#e3f2fd; border:1px solid #90caf9; color:#1565c0; }
+    #status-box.success { display:block; background:#e8f5e9; border:1px solid #a5d6a7; color:#1b5e20; }
+    #status-box.error   { display:block; background:#ffebee; border:1px solid #ef9a9a; color:#b71c1c; }
 
-    /* 스피너 */
     .spinner {
-      display: inline-block;
-      width: 14px; height: 14px;
-      border: 2px solid #90caf9;
-      border-top-color: #1565c0;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
+      display:inline-block; width:14px; height:14px;
+      border:2px solid #90caf9; border-top-color:#1565c0;
+      border-radius:50%; animation:spin 0.8s linear infinite;
+      vertical-align:middle; margin-right:6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* 로그 영역 */
     #log {
-      margin-top: 16px;
-      background: #f5f5f5;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 12px;
-      color: #555;
-      text-align: left;
-      display: none;
-      max-height: 150px;
-      overflow-y: auto;
-      line-height: 1.8;
+      margin-top: 16px; background: #f5f5f5;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 12px; color: #555;
+      text-align: left; display: none;
+      max-height: 150px; overflow-y: auto; line-height: 1.8;
     }
     #log.visible { display: block; }
     .log-item { border-bottom: 1px solid #eee; padding: 2px 0; }
@@ -105,26 +68,23 @@
 <body>
   <div class="card">
     <h2>📦 삼성 통합 발주서 실행</h2>
-    <p class="sub">실행할 발송 차수를 선택하세요</p>
+    <p class="sub">버튼을 누르면 새 주문건의 발주서가 생성돼요</p>
 
-    <button class="btn btn-1st" id="btn1" onclick="runWorkflow('1차', '1st')">🚀 1차 발송 실행</button>
-    <button class="btn btn-2nd" id="btn2" onclick="runWorkflow('2차', '2nd')">🚀 2차 발송 실행</button>
+    <button class="btn btn-main" id="btnRun" onclick="runWorkflow()">
+      🚀 발주서 생성 실행
+    </button>
 
     <div id="status-box"></div>
     <div id="log"></div>
   </div>
 
   <script>
-    // ✏️ 아래 두 URL을 n8n Production Webhook URL로 교체하세요
-    const WEBHOOK_URLS = {
-      '1st': 'https://sperospera.app.n8n.cloud/webhook/samsung-order-1st',
-      '2nd': 'https://sperospera.app.n8n.cloud/webhook/samsung-order-2nd'
-    };
+    // ✏️ 아래 URL을 n8n Production Webhook URL로 교체하세요
+    const WEBHOOK_URL = 'https://sperospera.app.n8n.cloud/webhook/samsung-order';
 
     function getTime() {
       return new Date().toLocaleTimeString('ko-KR');
     }
-
     function addLog(msg) {
       const log = document.getElementById('log');
       log.classList.add('visible');
@@ -134,82 +94,58 @@
       log.appendChild(item);
       log.scrollTop = log.scrollHeight;
     }
-
     function setStatus(type, html) {
       const box = document.getElementById('status-box');
       box.className = type;
       box.innerHTML = html;
     }
 
-    async function runWorkflow(label, key) {
-      const url = WEBHOOK_URLS[key];
-      const btn1 = document.getElementById('btn1');
-      const btn2 = document.getElementById('btn2');
+    async function runWorkflow() {
+      const btn = document.getElementById('btnRun');
 
-      // URL 미설정 체크
-      if (url.startsWith('N8N_')) {
-        setStatus('error', `❌ <b>설정 미완료</b><br>HTML 파일 안의 Webhook URL이 아직 교체되지 않았어요.<br><br>메모장으로 파일을 열고<br><code>N8N_${key.toUpperCase()}_URL</code> 부분을 n8n의 Production URL로 바꿔주세요.`);
-        addLog(`⚠️ [${label}] URL 미설정 상태`);
+      if (WEBHOOK_URL === 'N8N_WEBHOOK_URL') {
+        setStatus('error', '❌ <b>설정 미완료</b><br>HTML 파일 안의 <code>N8N_WEBHOOK_URL</code>을 n8n의 Production URL로 바꿔주세요.');
+        addLog('⚠️ URL 미설정 상태');
         return;
       }
 
-      // 버튼 비활성화 + 로딩 표시
-      btn1.disabled = true;
-      btn2.disabled = true;
-      setStatus('loading', `<span class="spinner"></span> <b>${label} 발송</b> 워크플로우 실행 요청 중...<br><small>n8n 서버에 연결하고 있어요. 잠시만 기다려 주세요.</small>`);
-      addLog(`🚀 [${label}] 실행 요청 시작 → ${url}`);
+      btn.disabled = true;
+      setStatus('loading', '<span class="spinner"></span> <b>발주서 생성 중...</b><br><small>n8n 서버에 연결하고 있어요. 잠시만 기다려 주세요.</small>');
+      addLog('🚀 실행 요청 시작');
 
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000); // 15초 타임아웃
-
-        const response = await fetch(url, {
-          method: 'GET',
-          signal: controller.signal
-        });
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        const response = await fetch(WEBHOOK_URL, { method: 'GET', signal: controller.signal });
         clearTimeout(timeout);
 
-        addLog(`📡 [${label}] 서버 응답: HTTP ${response.status}`);
+        addLog(`📡 서버 응답: HTTP ${response.status}`);
 
         if (response.ok) {
           setStatus('success',
-            `✅ <b>${label} 발송 워크플로우가 실행되었습니다!</b><br><br>` +
-            `• n8n이 주문 데이터를 처리하고 있어요<br>` +
-            `• 완료되면 슬랙으로 알림이 와요<br>` +
-            `• 슬랙 알림이 오지 않으면 n8n 실행 기록을 확인해 주세요`
+            '✅ <b>발주서가 생성되었습니다!</b><br><br>' +
+            '• 구글 드라이브에 파일이 업로드 됐어요<br>' +
+            '• 완료 알림이 슬랙으로 전송돼요<br>' +
+            '• 슬랙 알림이 없으면 n8n 실행 기록을 확인해 주세요'
           );
-          addLog(`✅ [${label}] 성공적으로 실행됨`);
+          addLog('✅ 성공적으로 실행됨');
         } else {
-          const text = await response.text().catch(() => '');
           setStatus('error',
-            `❌ <b>서버 오류가 발생했습니다 (HTTP ${response.status})</b><br><br>` +
-            `n8n 워크플로우가 <b>Active</b> 상태인지 확인해 주세요.<br>` +
-            `<small style="color:#999">응답: ${text.slice(0,100)}</small>`
+            `❌ <b>서버 오류 (HTTP ${response.status})</b><br><br>` +
+            'n8n 워크플로우가 <b>Publish</b> 상태인지 확인해 주세요.'
           );
-          addLog(`❌ [${label}] HTTP 오류 ${response.status}`);
+          addLog(`❌ HTTP 오류 ${response.status}`);
         }
-
       } catch (err) {
         if (err.name === 'AbortError') {
-          setStatus('error',
-            `⏱️ <b>응답 시간 초과 (15초)</b><br><br>` +
-            `n8n 서버가 응답하지 않아요.<br>` +
-            `• n8n Cloud 접속 후 워크플로우가 Active인지 확인<br>` +
-            `• 인터넷 연결 상태 확인`
-          );
-          addLog(`⏱️ [${label}] 타임아웃 (15초 초과)`);
+          setStatus('error', '⏱️ <b>응답 시간 초과 (15초)</b><br><br>n8n 서버가 응답하지 않아요.<br>• 워크플로우 Publish 상태 확인<br>• 인터넷 연결 확인');
+          addLog('⏱️ 타임아웃 (15초 초과)');
         } else {
-          setStatus('error',
-            `❌ <b>연결 실패</b><br><br>` +
-            `• n8n Webhook URL이 올바른지 확인해 주세요<br>` +
-            `• n8n Cloud에서 워크플로우가 <b>Active</b>인지 확인<br>` +
-            `<small style="color:#999">오류: ${err.message}</small>`
-          );
-          addLog(`❌ [${label}] 연결 오류: ${err.message}`);
+          setStatus('error', `❌ <b>연결 실패</b><br><br>Webhook URL이 올바른지 확인해 주세요.<br><small style="color:#999">오류: ${err.message}</small>`);
+          addLog(`❌ 연결 오류: ${err.message}`);
         }
       } finally {
-        btn1.disabled = false;
-        btn2.disabled = false;
+        btn.disabled = false;
       }
     }
   </script>
